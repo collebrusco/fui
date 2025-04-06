@@ -1,3 +1,3 @@
 # fui
-*F*inally, an attempt at a g*UI* library     
+**F**inally, an attempt at a g**UI** library     
 
