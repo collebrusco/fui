@@ -1,0 +1,52 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.2.2 Chrome/134.0.6998.178 Electron/35.1.2 Safari/537.36" version="26.2.2">
+  <diagram name="Page-1" id="lp2veiCRscP3U8StC7rZ">
+    <mxGraphModel dx="595" dy="401" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2336" pageHeight="1654" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ty1HiWzOJetkXGf1xy9L-2" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;fui&lt;/h1&gt;&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;Finally, a gUI library&lt;/h1&gt;&lt;p&gt;I want to finally make an attempt at a little gui library on top of flgl. maybe it will become part of flgl default tools in the future.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Some early design principles:&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;fui will have its own internal rendering objects, but not init the gl or create a window itself. It&#39;s assumed the user will do this and fui will access the flgl window and gl.&lt;/li&gt;&lt;li&gt;fui will operate in pixel units, i.e. the internal ortho camera&#39;s VW == window.frame.x&lt;/li&gt;&lt;li&gt;fui will follow the classic UI tree model&lt;/li&gt;&lt;/ul&gt;&lt;div&gt;Some details on the tree model / algos&lt;/div&gt;&lt;ul&gt;&lt;li&gt;UIelement&lt;/li&gt;&lt;ul&gt;&lt;li&gt;each element has a parent, 0..n children&lt;/li&gt;&lt;li&gt;each element has a description of their layout relative to parent&lt;/li&gt;&lt;ul&gt;&lt;li&gt;H/V anchor, pivot, offset, scale&lt;/li&gt;&lt;/ul&gt;&lt;li&gt;each element provides its personal bounding box, and one that is the union of that of all its children (i.e., bounding box of the subtree below this element)&lt;/li&gt;&lt;li&gt;virtual methods&lt;/li&gt;&lt;ul&gt;&lt;li&gt;onMouse{hover, click, scroll}&lt;/li&gt;&lt;li&gt;onLayout&lt;/li&gt;&lt;li&gt;onTick&lt;/li&gt;&lt;li&gt;getBB , or, do we make this a data member?&lt;/li&gt;&lt;/ul&gt;&lt;li&gt;Layout:&amp;nbsp;&lt;/li&gt;&lt;ul&gt;&lt;li&gt;this-&amp;gt;onLayout()&lt;/li&gt;&lt;li&gt;&lt;br&gt;&lt;/li&gt;&lt;li&gt;subBB = merge(this.BB, child.BB for all child in children)&lt;/li&gt;&lt;/ul&gt;&lt;/ul&gt;&lt;li&gt;UI&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;&lt;/p&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;fontFamily=Times New Roman;" parent="1" vertex="1">
+          <mxGeometry x="50" y="40" width="470" height="1310" as="geometry" />
+        </mxCell>
+        <mxCell id="ty1HiWzOJetkXGf1xy9L-3" value="high level" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="615" y="380" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ty1HiWzOJetkXGf1xy9L-4" value="UI" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="590" y="480" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ty1HiWzOJetkXGf1xy9L-5" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="ty1HiWzOJetkXGf1xy9L-4" target="ty1HiWzOJetkXGf1xy9L-6" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="790" y="610" as="sourcePoint" />
+            <mxPoint x="840" y="560" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ty1HiWzOJetkXGf1xy9L-6" value="root" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="760" y="570" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ty1HiWzOJetkXGf1xy9L-9" value="" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="930" y="530" width="320" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="ty1HiWzOJetkXGf1xy9L-10" value="screen" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="980" y="470" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ty1HiWzOJetkXGf1xy9L-11" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="ty1HiWzOJetkXGf1xy9L-6" target="ty1HiWzOJetkXGf1xy9L-12" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="720" y="544" as="sourcePoint" />
+            <mxPoint x="800" y="690" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ty1HiWzOJetkXGf1xy9L-12" value="dropdown" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="670" y="680" width="70" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ty1HiWzOJetkXGf1xy9L-13" value="panel" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="650" y="780" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="ty1HiWzOJetkXGf1xy9L-14" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="ty1HiWzOJetkXGf1xy9L-12" target="ty1HiWzOJetkXGf1xy9L-13" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="740" y="760" as="sourcePoint" />
+            <mxPoint x="680" y="770" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
