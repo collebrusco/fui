@@ -10,8 +10,6 @@
 #include <flgl/allocators.h>
 #include <vector>
 
-typedef heap_bumpalloc_t<4096> uialloc_t;
-
 struct UIbbox {
     bool inside(glm::vec2 mpos) const;
     void merge(UIbbox const& other);
@@ -61,6 +59,8 @@ struct UIelement {
 };
 
 
+
+typedef abstract_linear_objpool<UIelement, 8192> uialloc_t;
 
 struct UI {
     uialloc_t alloc;

@@ -52,10 +52,9 @@ int main() {
     for (int i = 0; i < UI::PIN_LAST; ++i) {
         auto& root = ui.roots[i];
 
-        TestBox* test = (TestBox*)ui.alloc.alloc(sizeof(TestBox));
-        new (test) TestBox(glm::vec2(40.f, 20.f));
+        TestBox* test = ui.alloc.push<TestBox>(glm::vec2(40.f, 20.f));
 
-        test->offset = glm::vec2(64.f, 0.f);
+        test->offset = glm::vec2(0.f, 0.f);
         test->parent = &root;
         root.children.push_back(test);
     }
