@@ -25,7 +25,7 @@ struct UIbbox {
     static UIbbox from_minmax(glm::vec2 min, glm::vec2 max);
     static UIbbox from_minsize(glm::vec2 min, glm::vec2 size);
     static inline UIbbox null() { return UIbbox(); }
-    UIbbox() : _min(1e100f), _max(-1e100f) {}
+    UIbbox() : _min(1e30f), _max(-1e30f) {}
 private:
     glm::vec2 _min, _max;
     UIbbox(glm::vec2 m, glm::vec2 M) : _min(m), _max(M) {}
@@ -39,6 +39,7 @@ struct UIelement {
     glm::vec2 offset = glm::vec2(0.f);
 
     glm::vec2 size;
+    UIbbox uvbbox;
     UIbbox bbox;
     UIbbox subtree_bbox;
 
@@ -50,12 +51,13 @@ struct UIelement {
     virtual void onMouseRelease(Mouse const& mouse);
     virtual void onMouseHoverEnter(Mouse const& mouse);
     virtual void onMouseHoverExit(Mouse const& mouse);
-    virtual void onDraw() const;
+    virtual void draw() const;
 
     // Utilities (non-virtual)
     glm::vec2 get_absolute_pos() const;
     UIelement* hitTest(glm::vec2 mpos);
     void updateSubtreeBBox();
+    void addChild(UIelement* child);
 };
 
 
@@ -90,7 +92,6 @@ struct UI {
 
     UI();
 
-    // Frame lifecycle
     void tick(float dt, Mouse const& mouse);
     void draw() const;
 
@@ -99,6 +100,24 @@ private:
     UIelement* held = nullptr;
 
     UIelement* hitTest(glm::vec2 mpos) const;
+};
+
+struct UIRenderer {
+    static VertexArray vao;
+    static VertexBuffer<Vertex_2f> vbo;
+    static ElementBuffer ibo;
+    static InstanceBuffer<iAttr_2v4> instance;
+
+    static Shader shader;
+    static Texture texture;
+
+    static void init(const char* texname);
+    static void destroy();
+    static void prepare(UI& ui);
+    static void render();
+private:
+    static void prepare_recurse(UIelement& root, UI const& ui, std::vector<iAttr_2v4>& data);
+    static size_t n_instances;
 };
 
 

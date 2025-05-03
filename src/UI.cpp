@@ -1,4 +1,5 @@
 #include "UI.h"
+using namespace glm;
 
 bool UIbbox::inside(glm::vec2 mpos) const {
     return mpos.x >= _min.x && mpos.x <= _max.x &&
@@ -71,7 +72,7 @@ void UIelement::onMousePress(Mouse const&) {}
 void UIelement::onMouseRelease(Mouse const&) {}
 void UIelement::onMouseHoverEnter(Mouse const&) {}
 void UIelement::onMouseHoverExit(Mouse const&) {}
-void UIelement::onDraw() const {
+void UIelement::draw() const {
 }
 
 glm::vec2 UIelement::get_absolute_pos() const {
@@ -98,24 +99,40 @@ void UIelement::updateSubtreeBBox() {
     }
 }
 
+void UIelement::addChild(UIelement *child) {
+    this->children.push_back(child);
+    child->parent = this;
+}
+
 UI::UI()
-    : roots{
-        UIRootElement(PIN_TOPLEFT),
-        UIRootElement(PIN_TOPCENTER),
-        UIRootElement(PIN_TOPRIGHT),
-        UIRootElement(PIN_CENTERLEFT),
-        UIRootElement(PIN_CENTERCENTER),
-        UIRootElement(PIN_CENTERRIGHT),
-        UIRootElement(PIN_BOTLEFT),
-        UIRootElement(PIN_BOTCENTER),
-        UIRootElement(PIN_BOTRIGHT)
-    } {}
-
+: roots{
+    UIRootElement(PIN_TOPLEFT),
+    UIRootElement(PIN_TOPCENTER),
+    UIRootElement(PIN_TOPRIGHT),
+    UIRootElement(PIN_CENTERLEFT),
+    UIRootElement(PIN_CENTERCENTER),
+    UIRootElement(PIN_CENTERRIGHT),
+    UIRootElement(PIN_BOTLEFT),
+    UIRootElement(PIN_BOTCENTER),
+    UIRootElement(PIN_BOTRIGHT)
+} 
+{
+}
 void UI::tick(float dt, Mouse const& mouse) {
-    for (UIRootElement& r : roots) r.onUpdate(dt);
+    for (UIRootElement& r : roots) {
+        std::vector<UIelement*> stack{&r};
+        while (!stack.empty()) {
+            UIelement* e = stack.back(); stack.pop_back();
 
-    for (UIRootElement& r : roots) r.updateSubtreeBBox();
+            e->onUpdate(dt);
+            e->updateSubtreeBBox();
 
+            for (UIelement* c : e->children)
+                stack.push_back(c);
+        }
+    }
+
+    // Update hover state
     glm::vec2 flipped_mouse_pos = { mouse.pos.x, window.frame.y - mouse.pos.y };
     UIelement* now_hovered = hitTest(flipped_mouse_pos);
     if (hovered != now_hovered) {
@@ -124,17 +141,9 @@ void UI::tick(float dt, Mouse const& mouse) {
         hovered = now_hovered;
     }
 
-    if (mouse.left().pressed && hovered) hovered->onMousePress(mouse);
+    // Handle mouse press/release
+    if (mouse.left().pressed && hovered)  hovered->onMousePress(mouse);
     if (mouse.left().released && hovered) hovered->onMouseRelease(mouse);
-
-    for (UIRootElement& r : roots) {
-        std::vector<UIelement*> stack{&r};
-        while (!stack.empty()) {
-            UIelement* e = stack.back(); stack.pop_back();
-            e->onUpdate(dt);
-            for (auto* c : e->children) stack.push_back(c);
-        }
-    }
 }
 
 void UI::draw() const {
@@ -142,7 +151,7 @@ void UI::draw() const {
         std::vector<UIelement const*> stack{&r};
         while (!stack.empty()) {
             UIelement const* e = stack.back(); stack.pop_back();
-            e->onDraw();
+            e->draw();
             for (auto* c : e->children) stack.push_back(c);
         }
     }
@@ -179,4 +188,83 @@ void UI::UIRootElement::onUpdate(float) {
     }
 }
 
+VertexArray UIRenderer::vao;
+VertexBuffer<Vertex_2f> UIRenderer::vbo;
+ElementBuffer UIRenderer::ibo;
+InstanceBuffer<iAttr_2v4> UIRenderer::instance;
+size_t UIRenderer::n_instances;
 
+Shader UIRenderer::shader;
+Texture UIRenderer::texture;
+
+void UIRenderer::init(const char* texname) {
+    const Vertex_2f verts[] = {
+        {0.f,0.f},
+        {0.f,1.f},
+        {1.f,1.f},
+        {1.f,0.f}
+    };
+    const uint32_t elems[] = {
+        0,2,1,
+        0,3,2
+    };
+    shader = Shader::from_source("ui_vert", "ui_frag");
+    shader.unbind();
+    if (texname) {
+        texture = Texture::from_file(texname);
+        texture.pixelate();
+    }
+    vao.create_bind();
+    vbo.create_bind();
+    vao.attach(vbo);
+    vbo.buffer_data(4, verts);
+    ibo.create_bind();
+    ibo.buffer_data(6, elems);
+    instance.create_bind();
+    vao.attach(instance);
+    vao.unbind();
+    vbo.unbind();
+    ibo.unbind();
+    instance.unbind();
+}
+
+void UIRenderer::destroy() {
+    vao.destroy();
+    vbo.destroy();
+    ibo.destroy();
+    instance.destroy();
+    shader.destroy();
+    texture.destroy();
+}
+
+void UIRenderer::prepare(UI& ui) {
+    std::vector<iAttr_2v4> instance_data;
+
+    for (size_t r = 0; r < UI::PIN_LAST; r++) {
+        prepare_recurse(ui.roots[r], ui, instance_data);
+    }
+
+    instance.bind();
+    instance.buffer(instance_data);
+    n_instances = instance_data.size();
+}
+
+void UIRenderer::prepare_recurse(UIelement& root, UI const &ui, std::vector<iAttr_2v4>& data) {
+    vec2 vmin, vmax;
+    vmin = root.bbox.min() / (vec2)window.frame;
+    vmax = root.bbox.max() / (vec2)window.frame;
+    data.push_back({{vmin.x, vmin.y, vmax.x, vmax.y},
+                    {root.uvbbox.min().x, root.uvbbox.min().y, root.uvbbox.max().x, root.uvbbox.max().y}});
+    for (UIelement* c : root.children) {
+        prepare_recurse(*c, ui, data);
+    }
+}
+
+void UIRenderer::render() {
+    vao.bind();
+    shader.bind();
+    texture.bind();
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    gl.draw_vao_ibo_instanced(ibo, n_instances);
+}
